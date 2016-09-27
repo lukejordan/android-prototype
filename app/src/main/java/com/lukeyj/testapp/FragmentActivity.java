@@ -13,7 +13,11 @@ public class FragmentActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        System.out.println("onCreate - FragmentActivity");
+
         super.onCreate(savedInstanceState);
+
         //setContentView(R.layout.activity_main);
 
         System.out.println("On next create baby.");
@@ -25,7 +29,9 @@ public class FragmentActivity extends AppCompatActivity {
         String message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
         System.out.println("message: " + message);
 
-        System.out.println("On end next create baby.");
+
+        System.out.println("onCreate end - FragmentActivity");
+
     }
 
 }
