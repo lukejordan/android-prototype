@@ -6,8 +6,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.lukeyj.testapp.domain.Job;
+import com.lukeyj.testapp.domain.Person;
+import com.lukeyj.testapp.utility.RestHelper;
+
 public class NextActivity extends AppCompatActivity {
 
+    public static final String ENVIRONMENT_HOST_NAME = "http://test-loadbalancer-1089136587.us-west-2.elb.amazonaws.com";
+                                                      //http://basisapp-env.us-west-2.elasticbeanstalk.com
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println("onCreate - NextActivity");
@@ -15,13 +21,76 @@ public class NextActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.activity_main);
 
-        setContentView(R.layout.activity_next);
+        setContentView(R.layout.activity_next_dynamic);
 
         Intent intent = getIntent();
         String message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
         System.out.println("message: " + message);
 
+        dynamicFragment(savedInstanceState);
+
+        String url ="http://www.google.com";
+        url = ENVIRONMENT_HOST_NAME + "/service/testMultiple";
+
+        //RestHelper.makeGetRequest (url, this);
+        //RestHelper.makeStandardJsonGet(url, this);
+        RestHelper.makeStringGetRequest(url, this);
+        RestHelper.makePostRequest (prepareMockData (message), ENVIRONMENT_HOST_NAME + "/service/testPost2", this);
+
         System.out.println("On end next create baby.");
+    }
+
+    private Object prepareMockData (String postedData) {
+        Person person = new Person ();
+
+        Job job = new Job();
+        job.setCompany("post office");
+        job.setRole("postie job");
+
+        person.setAge(999);
+        person.setFirstName(postedData);
+        person.setLastName("postman");
+        person.setJob(job);
+
+        return person;
+    }
+
+    /**
+     *
+     * Here be dragons....
+     *
+     */
+
+
+
+
+    private void dynamicFragment(Bundle savedInstanceState) {
+        if (findViewById(R.id.fragment_container) != null) {
+
+            // However, if we're being restored from a previous state,
+            // then we don't need to do anything and should return or else
+            // we could end up with overlapping fragments.
+            if (savedInstanceState != null) {
+                return;
+            }
+
+            // Create a new Fragment to be placed in the activity layout
+            HeadlineFragment firstFragment = new HeadlineFragment();
+            ArticleFragment secondFragment = new ArticleFragment();
+
+            // In case this activity was started with special instructions from an
+            // Intent, pass the Intent's extras to the fragment as arguments
+            firstFragment.setArguments(getIntent().getExtras());
+            secondFragment.setArguments(getIntent().getExtras());
+
+            // Add the fragment to the 'fragment_container' FrameLayout
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, firstFragment)
+                    //.add(R.id.fragment_container, secondFragment)
+                    .commit();
+        }
+
+
     }
 
     @Override
