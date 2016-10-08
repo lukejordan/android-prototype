@@ -19,23 +19,25 @@ public class NextActivity extends AppCompatActivity {
         System.out.println("onCreate - NextActivity");
 
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_main);
 
+        //setContentView(R.layout.activity_main);
         setContentView(R.layout.activity_next_dynamic);
 
         Intent intent = getIntent();
+
         String message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
         System.out.println("message: " + message);
-
-        dynamicFragment(savedInstanceState);
 
         String url ="http://www.google.com";
         url = ENVIRONMENT_HOST_NAME + "/service/testMultiple";
 
-        //RestHelper.makeGetRequest (url, this);
-        //RestHelper.makeStandardJsonGet(url, this);
+        RestHelper.makeGetRequest (url, this);
+        RestHelper.makeStandardJsonGet(url, this);
+        RestHelper.makeStandardJsonArrayGet(url, this);
         RestHelper.makeStringGetRequest(url, this);
         RestHelper.makePostRequest (prepareMockData (message), ENVIRONMENT_HOST_NAME + "/service/testPost2", this);
+
+        dynamicFragment(savedInstanceState);
 
         System.out.println("On end next create baby.");
     }
