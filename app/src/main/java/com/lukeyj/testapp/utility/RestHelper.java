@@ -16,11 +16,13 @@ import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.HurlStack;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.lukeyj.testapp.domain.Person;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
@@ -65,6 +67,7 @@ public class RestHelper {
                 return mHeaders;
             }
         };
+
         retrieveQueue(callingClass).add(stringRequest);
         System.out.println("Make get request - end");
     }
@@ -83,8 +86,8 @@ public class RestHelper {
                 public void onResponse(String response) {
                     // Display the first 500 characters of the response string.
                     //System.out.println ("Response is: "+ response.substring(0,500));
-                    System.out.println ("Post response is: "+ response);
 
+                    System.out.println ("Post response is: "+ response);
                 }
             }, new Response.ErrorListener() {
 
@@ -115,17 +118,17 @@ public class RestHelper {
 
                 @Override
                 protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                    System.out.println("Post - Parsing response");
                     String responseString = "";
-                    if (response != null) {
-                        //response.data.
-                        System.out.println("Post - Response status code: " + response.statusCode);
-                        System.out.println("Post - Response data: " + new String(response.data));
-                        System.out.println("Post - Response class type: " + response.data.getClass().getName());
 
-                        //responseString = String.valueOf(response.statusCode);
+                    if (response != null) {
+                        System.out.println("Post - Response status code: " + response.statusCode);
                         responseString = String.valueOf(new String(response.data));
+                        System.out.println("Post - Response data: " + responseString);
+
                         // can get more details such as response.headers
+                    }
+                    else {
+                        System.out.println("Post - Response is null");
                     }
                     return Response.success(responseString, HttpHeaderParser.parseCacheHeaders(response));
                 }
@@ -176,7 +179,26 @@ public class RestHelper {
                     }
                 });
 
-        // Access the RequestQueue through your singleton class.
+        retrieveQueue(callingClass).add(jsObjRequest);
+    }
+
+    public static void makeStandardJsonArrayGet (String url, Context callingClass) {
+
+        JsonArrayRequest jsObjRequest = new JsonArrayRequest
+                (url, new Response.Listener<JSONArray>() {
+
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        System.out.println("Json array get Response: " + response.toString());
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        System.out.println("Error in json array get: " + error.getMessage());
+                    }
+                });
+
         retrieveQueue(callingClass).add(jsObjRequest);
     }
 
@@ -191,19 +213,7 @@ public class RestHelper {
 
     public static void makeStringGetRequest (String url, Context currentClass) {
 
-        RequestQueue mRequestQueue;
-
-        // Instantiate the cache
-        Cache cache = new DiskBasedCache(currentClass.getCacheDir(), 1024 * 1024); // 1MB cap
-
-        // Set up the network to use HttpURLConnection as the HTTP client.
-        Network network = new BasicNetwork(new HurlStack());
-
-        // Instantiate the RequestQueue with the cache and network.
-        mRequestQueue = new RequestQueue(cache, network);
-
-        // Start the queue
-        mRequestQueue.start();
+        RequestQueue mRequestQueue = retrieveCustomQueue (currentClass);
 
         // Formulate the request and handle the response.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -222,10 +232,27 @@ public class RestHelper {
                     }
                 });
 
-        // Add the request to the RequestQueue.
         mRequestQueue.add(stringRequest);
 
+    }
 
+    private static RequestQueue retrieveCustomQueue(Context currentClass) {
+
+        RequestQueue mRequestQueue = null;
+
+        // Instantiate the cache
+        Cache cache = new DiskBasedCache(currentClass.getCacheDir(), 1024 * 1024); // 1MB cap
+
+        // Set up the network to use HttpURLConnection as the HTTP client.
+        Network network = new BasicNetwork(new HurlStack());
+
+        // Instantiate the RequestQueue with the cache and network.
+        mRequestQueue = new RequestQueue(cache, network);
+
+        // Start the queue
+        mRequestQueue.start();
+
+        return mRequestQueue;
     }
 
 }
